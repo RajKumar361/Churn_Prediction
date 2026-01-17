@@ -1,29 +1,276 @@
 <!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Customer Churn Detection</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <div class="navbar">
-    <h1>Banking Churn Predictor</h1>
-    <div>
-      <a href="{{ url_for('index') }}">Home</a>
-      <a href="{{ url_for('predict_form') }}">Predict</a>
-      <a href="{{ url_for('stats') }}">Statistics</a>
-      <a href="{{ url_for('about') }}">About</a>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Churn Prediction Dashboard</title>
+
+    <!-- CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <!-- ================= NAVBAR ================= -->
+    <div class="navbar">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#predict">Predict</a>
+      <a href="#stats">Statistics</a>
+      <a href="#about-us">About Us</a>
     </div>
-  </div>
 
-  <div class="container">
-    <h2>Welcome to the Banking Service Churn Prediction App</h2>
-    <p>This system helps banks identify potential customer churn based on credit score, tenure, balance, and other key financial indicators.</p>
-    <p>Use the navigation above to start predicting or explore churn statistics.</p>
-  </div>
+    <!-- ================= HOME SECTION ================= -->
+    <section id="home" class="section">
+      <img
+        class="hero-img"
+        src="{{ url_for('static', filename='images/dashboard.png') }}"
+        alt="Dashboard Image"
+      />
+      <h1>Customer Churn Prediction System</h1>
+      <p>AI-powered analytics to predict customer churn with precision.</p>
+    </section>
+    <hr />
+    <hr />
+    <!-- ================= ABOUT SECTION ================= -->
+    <section id="about" class="section about">
+      <div class="about-images">
+        <div class="about-text">
+          <p>
+            This project is an end-to-end Machine Learning powered web
+            application designed to predict customer churn and present insights
+            through a modern, professional dashboard interface. It combines data
+            science, backend development, and frontend design into one complete
+            solution.
+          </p>
 
-  <footer>
-    © 2025 Banking Churn Detection Project
-  </footer>
-</body>
+          <p>
+            The main goal of this system is to help businesses identify
+            customers who are likely to leave (churn) and take proactive actions
+            to retain them.
+          </p>
+
+          <h3>🔹 What This Project Does</h3>
+
+          <ul>
+            <li>
+              Predicts whether a customer will exit a service using a trained
+              Machine Learning model.
+            </li>
+            <li>Shows the churn probability in percentage form.</li>
+            <li>Classifies customers into:</li>
+            <ul>
+              <li>🔴 High Risk</li>
+              <li>🟡 Medium Risk</li>
+              <li>🟢 Low Risk</li>
+            </ul>
+            <li>Stores each prediction in a database.</li>
+            <li>Displays real-time statistics in a single-page dashboard.</li>
+            <li>Visualizes prediction trends using charts.</li>
+          </ul>
+        </div>
+        <img
+          src="{{ url_for('static', filename='images/churn.png') }}"
+          alt="Churn Prediction"
+        />
+      </div>
+    </section>
+
+    <!-- ================= PREDICTION FORM ================= -->
+    <section id="predict" class="section">
+      <h2>Predict Customer Churn</h2>
+
+      <form action="/predict" method="POST" id="predictionForm">
+        <input
+          type="number"
+          name="CreditScore"
+          placeholder="Credit Score"
+          required
+        />
+        <input type="number" name="Age" placeholder="Age" required />
+        <input type="number" name="Tenure" placeholder="Tenure" required />
+        <input type="number" name="Balance" placeholder="Balance" required />
+        <input
+          type="number"
+          name="Product"
+          placeholder="Number of Products"
+          required
+        />
+        <input
+          type="number"
+          name="EstimatedSalary"
+          placeholder="Estimated Salary"
+          required
+        />
+
+        <select name="Gender" required>
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+
+        <select name="Country" required>
+          <option value="">Select Country</option>
+          <option value="France">France</option>
+          <option value="Germany">Germany</option>
+          <option value="Spain">Spain</option>
+        </select>
+
+        <select name="HasCrCard">
+          <option value="1">Has Credit Card</option>
+          <option value="0">No Credit Card</option>
+        </select>
+
+        <select name="IsActiveMember">
+          <option value="1">Active Member</option>
+          <option value="0">Not Active</option>
+        </select>
+
+        <button type="submit">Predict Now</button>
+      </form>
+    </section>
+
+    <!-- ================= STATS SECTION ================= -->
+    <section id="stats" class="section">
+      <h2>Prediction Statistics</h2>
+
+      <div class="chart-wrapper">
+        <canvas id="riskChart"></canvas>
+      </div>
+
+      <!-- Latest Prediction Result -->
+      {% if probability %}
+      <div class="latest-prediction">
+        <h3>Latest Prediction Result</h3>
+        <div class="prediction-result">
+          <div class="result-card">
+            <span class="result-label">Churn Probability:</span>
+            <span class="result-value">{{ probability }}%</span>
+          </div>
+          <div
+            class="result-card {% if risk == 'High' %}risk-high{% elif risk == 'Medium' %}risk-medium{% else %}risk-low{% endif %}"
+          >
+            <span class="result-label">Risk Level:</span>
+            <span class="result-value">
+              {% if risk == 'High' %} 🔴 HIGH RISK {% elif risk == 'Medium' %}
+              🟡 MEDIUM RISK {% else %} 🟢 LOW RISK {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="stats-info">
+        <p>Total Predictions: {{ total }}</p>
+        <p>High Risk: {{ high }}</p>
+        <p>Medium Risk: {{ med }}</p>
+        <p>Low Risk: {{ low }}</p>
+        <p>Average Probability: {{ avg_prob }}%</p>
+      </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer id="about-us" class="section">
+      <div class="about-us-content">
+        <h2>About Us</h2>
+
+        <p>
+          This Project is done by Final Year Students of Computer Science and
+          Engineering And Data Science at G Pulla Reddy Engineering College
+        </p>
+
+        <h3>Team Members</h3>
+        <ul class="team-list">
+          <li><strong>K Rajkumar</strong> - 229X1A32B8</li>
+          <li><strong>A Eswar Prasad</strong> - 239X5A32C9</li>
+          <li><strong>A Harikishan Reddy</strong> - 239X5A32D1</li>
+        </ul>
+
+        <h3>Guided By</h3>
+        <p><strong>Sri. Y. Shiva Kumar</strong> - Assistant Professor</p>
+
+        <hr />
+        <p style="font-size: 0.9rem; margin-top: 20px">
+          © 2026 Churn Prediction AI Dashboard | Developed by Raj Kumar
+        </p>
+      </div>
+    </footer>
+
+    <!-- ================= CHART SCRIPT ================= -->
+    <script>
+      // Auto-scroll to stats section if prediction exists
+      {% if probability %}
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.getElementById('stats').scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+      });
+      {% endif %}
+
+      // Also handle form submission scroll
+      const predictionForm = document.getElementById('predictionForm');
+      if (predictionForm) {
+        predictionForm.addEventListener('submit', function() {
+          // Add hash to URL to scroll after redirect
+          this.action = '/predict#stats';
+        });
+      }
+
+      const ctx = document.getElementById('riskChart');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+          datasets: [{
+            label: 'Churn Risk Distribution',
+            data: [{{ high }}, {{ med }}, {{ low }}],
+            borderWidth: 1,
+            backgroundColor: [
+              'rgba(220, 38, 38, 0.7)',
+              'rgba(217, 119, 6, 0.7)',
+              'rgba(34, 197, 94, 0.7)'
+            ],
+            borderColor: [
+              'rgba(220, 38, 38, 1)',
+              'rgba(217, 119, 6, 1)',
+              'rgba(34, 197, 94, 1)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e2e8f0'
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                color: '#e2e8f0'
+              },
+              grid: {
+                color: 'rgba(56, 189, 248, 0.1)'
+              }
+            },
+            x: {
+              ticks: {
+                color: '#e2e8f0'
+              },
+              grid: {
+                color: 'rgba(56, 189, 248, 0.1)'
+              }
+            }
+          }
+        }
+      });
+    </script>
+  </body>
 </html>

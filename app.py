@@ -1,15 +1,27 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import pickle
 import numpy as np
-from datetime import datetime
 from prediction_db import init_db, save_prediction, get_all_predictions
 
-app = Flask(__name__)
+# Flask configuration
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
 
-# Initialize the local SQLite database
-init_db()
+# ----------------------------
+# Initialize Database
+# ----------------------------
+try:
+    init_db()
+    print("📦 Database initialized successfully.")
+except Exception as e:
+    print(f"❌ Database init error: {e}")
 
-# Load trained model, scaler, and feature order
+# ----------------------------
+# Load Model Artifacts
+# ----------------------------
 try:
     MODEL_PATH = "models/churn_model.pkl"
     SCALER_PATH = "models/scaler.pkl"
@@ -19,15 +31,15 @@ try:
     scaler = pickle.load(open(SCALER_PATH, "rb"))
     feature_order = pickle.load(open(FEATURES_PATH, "rb"))
 
-    print("[INFO] Model, Scaler, and Feature List Loaded Successfully.")
+    print("🧠 Model, Scaler, and Features loaded successfully.")
 except Exception as e:
-    print(f"[ERROR] Could not load model/scaler/features: {e}")
+    print(f"❌ Model loading failed: {e}")
     model = None
     scaler = None
     feature_order = []
 
 # ----------------------------
-# Risk Classification Function
+# Risk Classification
 # ----------------------------
 def get_risk_category(prob):
     if prob >= 0.7:
@@ -38,55 +50,80 @@ def get_risk_category(prob):
         return "Low"
 
 # ----------------------------
-# Routes
+# Home Page (Single Page App)
 # ----------------------------
 @app.route("/")
 def index():
-    return render_template("index.html")
+    try:
+        records = get_all_predictions()
+        total = len(records)
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
+        high = len([r for r in records if r[13] == "High"]) if total else 0
+        medium = len([r for r in records if r[13] == "Medium"]) if total else 0
+        low = len([r for r in records if r[13] == "Low"]) if total else 0
+    except:
+        total = high = medium = low = 0
 
-@app.route("/predict_form")
-def predict_form():
-    return render_template("predict.html")
+    return render_template(
+        "index.html",
+        total=total,
+        high=high,
+        medium=medium,
+        low=low,
+        probability=None,
+        risk=None
+    )
 
+# ----------------------------
+# Prediction Route
+# ----------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
     if model is None or scaler is None:
-        return "Model or Scaler not loaded properly."
+        return "❌ Model or scaler not loaded."
 
-    form_data = request.form.to_dict()
-
-    # Extract and preprocess input data
     try:
-        features = {
-            "CreditScore": float(form_data["CreditScore"]),
-            "Gender": int(form_data["Gender"]),
-            "Age": float(form_data["Age"]),
-            "Tenure": float(form_data["Tenure"]),
-            "Balance": float(form_data["Balance"]),
-            "NumOfProducts": float(form_data["Product"]),
-            "HasCrCard": int(form_data["HasCrCard"]),
-            "IsActiveMember": int(form_data["IsActiveMember"]),
-            "EstimatedSalary": float(form_data["EstimatedSalary"]),
-            "Geography": float(form_data["Country"])
-        }
+        form_data = request.form.to_dict()
 
-        # Convert into model input array
+        # Initialize all features with 0
+        features = dict.fromkeys(feature_order, 0)
+
+        # Numeric fields
+        features["CreditScore"] = float(form_data["CreditScore"])
+        features["Age"] = float(form_data["Age"])
+        features["Tenure"] = float(form_data["Tenure"])
+        features["Balance"] = float(form_data["Balance"])
+        features["NumOfProducts"] = float(form_data["Product"])
+        features["EstimatedSalary"] = float(form_data["EstimatedSalary"])
+
+        features["HasCrCard"] = int(form_data.get("HasCrCard", 1))
+        features["IsActiveMember"] = int(form_data.get("IsActiveMember", 1))
+
+        # Gender Encoding
+        if form_data["Gender"] == "Male" and "Gender_Male" in features:
+            features["Gender_Male"] = 1
+
+        # Geography Encoding
+        country = form_data["Country"]
+        if country == "Germany" and "Geography_Germany" in features:
+            features["Geography_Germany"] = 1
+        elif country == "Spain" and "Geography_Spain" in features:
+            features["Geography_Spain"] = 1
+
+        # Model prediction
         X = np.array([features[f] for f in feature_order]).reshape(1, -1)
         X_scaled = scaler.transform(X)
+
         prob = model.predict_proba(X_scaled)[0][1]
         probability_percent = round(prob * 100, 2)
         risk = get_risk_category(prob)
 
-        # Save prediction to DB
+        # Save to DB
         customer_data = {
             "CustomerId": form_data.get("CustomerId", "N/A"),
             "CreditScore": features["CreditScore"],
-            "Geography": features["Geography"],
-            "Gender": "Male" if features["Gender"] == 1 else "Female",
+            "Geography": country,
+            "Gender": form_data["Gender"],
             "Age": features["Age"],
             "Tenure": features["Tenure"],
             "Balance": features["Balance"],
@@ -98,52 +135,29 @@ def predict():
 
         save_prediction(customer_data, f"{probability_percent}%", risk)
 
+        # Reload stats
+        records = get_all_predictions()
+        total = len(records)
+        high = len([r for r in records if r[13] == "High"])
+        medium = len([r for r in records if r[13] == "Medium"])
+        low = len([r for r in records if r[13] == "Low"])
+
         return render_template(
-            "result.html",
+            "index.html",
             probability=probability_percent,
-            risk=risk
+            risk=risk,
+            total=total,
+            high=high,
+            medium=medium,
+            low=low
         )
 
     except Exception as e:
-        return f"Error while predicting: {e}"
+        return f"❌ Prediction Error: {e}"
 
-@app.route("/stats")
-def stats():
-    records = get_all_predictions()
-    total = len(records)
-    if total == 0:
-        return render_template("stats.html", total=0)
-
-    high = len([r for r in records if r[13] == "High"])
-    medium = len([r for r in records if r[13] == "Medium"])
-    low = len([r for r in records if r[13] == "Low"])
-
-    # Extract probabilities safely
-    probs = []
-    for r in records:
-        try:
-            val = float(r[12].replace("%", ""))
-            probs.append(val)
-        except:
-            pass
-
-    avg_prob = round(sum(probs) / len(probs), 2) if probs else 0
-
-    # Format for display
-    recent = [
-        {"timestamp": r[14], "probability": r[12], "risk": r[13]}
-        for r in records[:10]
-    ]
-
-    return render_template(
-        "stats.html",
-        total=total,
-        high=high,
-        med=medium,
-        low=low,
-        avg_prob=avg_prob,
-        recent=recent
-    )
-
+# ----------------------------
+# Run Server
+# ----------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    print("🚀 Flask server is starting...")
+    app.run(host="0.0.0.0", port=5000, debug=True)
