@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Predict Customer Churn</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <h1>Banking Churn Predictor</h1>
+    <div>
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('predict_form') }}">Predict</a>
+      <a href="{{ url_for('stats') }}">Statistics</a>
+      <a href="{{ url_for('about') }}">About</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Enter Customer Details for Prediction</h2>
+    <form method="POST" action="{{ url_for('predict') }}">
+      
+      <label>Row Number</label>
+      <input name="RowNumber" type="number" required>
+
+      <label>Customer ID</label>
+      <input name="CustomerId" type="number" required>
+
+      <label>Surname</label>
+      <input name="Surname" type="text" required>
+
+      <label>Credit Score</label>
+      <input name="CreditScore" type="number" required>
+
+      <label>Geography</label>
+      <select name="Geography">
+        <option value="France">France</option>
+        <option value="Spain">Spain</option>
+        <option value="Germany">Germany</option>
+      </select>
+
+      <label>Gender</label>
+      <select name="Gender">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+
+      <label>Age</label>
+      <input name="Age" type="number" required>
+
+      <label>Tenure (years)</label>
+      <input name="Tenure" type="number" required>
+
+      <label>Balance</label>
+      <input name="Balance" type="number" required>
+
+      <label>Number of Products</label>
+      <input name="NumOfProducts" type="number" required>
+
+      <label>Has Credit Card</label>
+      <select name="HasCrCard">
+        <option value="1">Yes</option>
+        <option value="0">No</option>
+      </select>
+
+      <label>Is Active Member</label>
+      <select name="IsActiveMember">
+        <option value="1">Yes</option>
+        <option value="0">No</option>
+      </select>
+
+      <label>Estimated Salary</label>
+      <input name="EstimatedSalary" type="number" required>
+
+      <button type="submit" class="btn">Predict Churn</button>
+    </form>
+  </div>
+
+  <footer>
+    © 2025 Banking Churn Detection Project
+  </footer>
+</body>
+</html>
