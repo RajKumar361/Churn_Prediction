@@ -259,7 +259,7 @@ body {
 }
 
 /* ============================
-   CARD STYLE (Use for forms, stats, about)
+   CARD STYLE
    ============================ */
 
 .card {
@@ -289,23 +289,6 @@ body {
 /* ============================
    PREDICTION RESULT DISPLAY
    ============================ */
-
-.latest-prediction {
-  max-width: 900px;
-  margin: 30px auto;
-  padding: 30px;
-  background: var(--card-bg);
-  border-radius: 18px;
-  border: 2px solid rgba(56, 189, 248, 0.5);
-  box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
-}
-
-.latest-prediction h3 {
-  text-align: center;
-  margin-bottom: 20px;
-  text-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7));
-}
 
 .prediction-result {
   display: flex;
@@ -414,6 +397,13 @@ button:hover {
    INPUTS & FORMS
    ============================ */
 
+.form-hint {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
 input,
 select {
   width: 100%;
@@ -424,6 +414,7 @@ select {
   color: white;
   margin-bottom: 15px;
   outline: none;
+  box-sizing: border-box;
 }
 
 input:focus,
@@ -480,7 +471,7 @@ p {
 }
 
 /* ============================
-   FOOTER (optional)
+   FOOTER
    ============================ */
 
 .about-us-content {
@@ -537,16 +528,12 @@ p {
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
-.footer {
-  background: #020617;
-  padding: 20px;
-  text-align: center;
-  color: var(--text-muted);
+hr {
+  border: none;
+  height: 1px;
+  background: rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
-
-/* ============================
-   STATS INFO & PREDICTION HISTORY
-   ============================ */
 
 .stats-info {
   max-width: 900px;
@@ -557,99 +544,96 @@ p {
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 }
 
 .stats-info p {
-  background: rgba(56, 189, 248, 0.08);
   padding: 15px;
-  border-radius: 12px;
-  border-left: 4px solid #38bdf8;
-  text-align: center;
-  color: #e2e8f0;
-  font-weight: 600;
-}
-
-/* Prediction History Table */
-.prediction-history {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 30px;
-  background: var(--card-bg);
-  border-radius: 18px;
-  border: 1px solid var(--border-soft);
-  box-shadow: var(--shadow-soft);
-}
-
-.prediction-history h3 {
-  text-align: center;
-  margin-bottom: 25px;
-  text-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7));
-}
-
-.history-table-wrapper {
-  overflow-x: auto;
+  background: rgba(56, 189, 248, 0.05);
   border-radius: 12px;
   border: 1px solid rgba(56, 189, 248, 0.3);
+  margin: 0;
 }
 
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: rgba(2, 6, 23, 0.6);
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .navbar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    justify-content: center;
+    padding: 15px;
+    position: static;
+  }
+
+  .about-images {
+    flex-direction: column;
+  }
+
+  .about-images img,
+  .about-text {
+    width: 100%;
+    height: 50vh;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  #predict,
+  #stats {
+    padding: 40px 20px;
+  }
 }
 
-.history-table thead {
-  background: rgba(56, 189, 248, 0.15);
-}
+@media (max-width: 768px) {
+  .section {
+    min-height: auto;
+    height: auto;
+    padding: 40px 20px;
+  }
 
-.history-table th {
-  padding: 15px;
-  text-align: left;
-  color: #38bdf8;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-  border-bottom: 2px solid rgba(56, 189, 248, 0.3);
-}
+  #home {
+    height: 60vh;
+  }
 
-.history-table td {
-  padding: 12px 15px;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(56, 189, 248, 0.1);
-}
+  .hero-img {
+    height: 60vh;
+  }
 
-.history-table tbody tr {
-  transition: 0.3s ease;
-}
+  h1 {
+    font-size: 1.5rem;
+  }
 
-.history-table tbody tr:hover {
-  background: rgba(56, 189, 248, 0.08);
-}
+  h2 {
+    font-size: 1.3rem;
+  }
 
-.history-table tr.risk-high {
-  border-left: 4px solid rgba(220, 38, 38, 0.8);
-}
+  .card {
+    padding: 20px;
+  }
 
-.history-table tr.risk-high:hover {
-  background: rgba(220, 38, 38, 0.08);
-}
+  input,
+  select {
+    font-size: 16px;
+  }
 
-.history-table tr.risk-medium {
-  border-left: 4px solid rgba(217, 119, 6, 0.8);
-}
+  .result-card {
+    min-width: 200px;
+  }
 
-.history-table tr.risk-medium:hover {
-  background: rgba(217, 119, 6, 0.08);
-}
+  .navbar {
+    gap: 10px;
+    padding: 10px;
+  }
 
-.history-table tr.risk-low {
-  border-left: 4px solid rgba(34, 197, 94, 0.8);
-}
-
-.history-table tr.risk-low:hover {
-  background: rgba(34, 197, 94, 0.08);
+  .navbar a {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
 }

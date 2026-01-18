@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import pickle
 import numpy as np
 from prediction_db import init_db, save_prediction, get_all_predictions
@@ -9,6 +10,9 @@ app = Flask(
     template_folder="templates",
     static_folder="static"
 )
+
+# Enable CORS for all routes
+CORS(app)
 
 # ----------------------------
 # Initialize Database
@@ -153,6 +157,18 @@ def predict():
         probs = [float(r[12].rstrip('%')) for r in records if r[12]]
         avg_prob = round(sum(probs) / len(probs), 2) if probs else 0
 
+        # Return JSON for API calls and HTML for browser
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify({
+                "probability": probability_percent,
+                "risk": risk,
+                "total": total,
+                "high": high,
+                "medium": medium,
+                "low": low,
+                "avg_prob": avg_prob
+            })
+        
         return render_template(
             "index.html",
             probability=probability_percent,
