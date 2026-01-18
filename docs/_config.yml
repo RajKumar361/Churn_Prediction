@@ -1,0 +1,29 @@
+# GitHub Pages Jekyll Configuration
+
+# Theme
+theme: null
+
+# Exclude unnecessary files
+exclude:
+  - .gitignore
+  - node_modules/
+  - Gemfile
+  - README.md
+
+# Keep files
+include:
+  - .nojekyll
+
+# URL configuration
+url: ""
+baseurl: "/Churn_Prediction"
+
+# Title and description
+title: "Churn Prediction AI Dashboard"
+description: "AI-powered customer churn prediction system"
+
+# Markdown processor
+markdown: kramdown
+
+# Enable UTF-8 encoding
+encoding: utf-8
