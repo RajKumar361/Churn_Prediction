@@ -22,9 +22,9 @@ FEATURES_PATH = "models/features.pkl"
 # -----------------------------
 # Load dataset
 # -----------------------------
-print("📂 Loading dataset...")
+print(" Loading dataset...")
 df = pd.read_csv(DATASET_PATH)
-print(f"✅ Dataset loaded: {df.shape}")
+print(f" Dataset loaded: {df.shape}")
 
 # Fix column names
 df.columns = df.columns.str.strip()
@@ -35,7 +35,7 @@ df.columns = df.columns.str.strip()
 target = "Exited"
 
 if target not in df.columns:
-    raise ValueError(f"❌ Target column '{target}' not found in dataset!")
+    raise ValueError(f" Target column '{target}' not found in dataset!")
 
 # -----------------------------
 # Drop unused columns
@@ -72,7 +72,7 @@ X_test.to_csv("data/X_test.csv", index=False)
 y_train.to_csv("data/y_train.csv", index=False)
 y_test.to_csv("data/y_test.csv", index=False)
 
-print("📁 Train/Test data saved in 'data/' folder")
+print("Train/Test data saved in 'data/' folder")
 
 # -----------------------------
 # Feature scaling
@@ -84,7 +84,7 @@ X_test_scaled = scaler.transform(X_test)
 # -----------------------------
 # Train model
 # -----------------------------
-print("🧠 Training model...")
+print("Training model...")
 model = RandomForestClassifier(
     n_estimators=200,
     random_state=42
@@ -95,7 +95,7 @@ model.fit(X_train_scaled, y_train)
 # Evaluate model
 # -----------------------------
 score = model.score(X_test_scaled, y_test)
-print(f"✅ Model accuracy: {score * 100:.2f}%")
+print(f" Model accuracy: {score * 100:.2f}%")
 
 # -----------------------------
 # Save model artifacts
@@ -104,4 +104,4 @@ pickle.dump(model, open(MODEL_PATH, "wb"))
 pickle.dump(scaler, open(SCALER_PATH, "wb"))
 pickle.dump(list(X.columns), open(FEATURES_PATH, "wb"))
 
-print("✅ Model, Scaler, and Features saved successfully in /models")
+print("Model, Scaler, and Features saved successfully in /models")

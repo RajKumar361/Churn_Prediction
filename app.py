@@ -15,9 +15,9 @@ app = Flask(
 # ----------------------------
 try:
     init_db()
-    print("📦 Database initialized successfully.")
+    print(" Database initialized successfully.")
 except Exception as e:
-    print(f"❌ Database init error: {e}")
+    print(f"Database init error: {e}")
 
 # ----------------------------
 # Load Model Artifacts
@@ -31,9 +31,9 @@ try:
     scaler = pickle.load(open(SCALER_PATH, "rb"))
     feature_order = pickle.load(open(FEATURES_PATH, "rb"))
 
-    print("🧠 Model, Scaler, and Features loaded successfully.")
+    print(" Model, Scaler, and Features loaded successfully.")
 except Exception as e:
-    print(f"❌ Model loading failed: {e}")
+    print(f" Model loading failed: {e}")
     model = None
     scaler = None
     feature_order = []
@@ -80,7 +80,7 @@ def index():
 @app.route("/predict", methods=["POST"])
 def predict():
     if model is None or scaler is None:
-        return "❌ Model or scaler not loaded."
+        return "Model or scaler not loaded."
 
     try:
         form_data = request.form.to_dict()
@@ -153,11 +153,11 @@ def predict():
         )
 
     except Exception as e:
-        return f"❌ Prediction Error: {e}"
+        return f" Prediction Error: {e}"
 
 # ----------------------------
 # Run Server
 # ----------------------------
 if __name__ == "__main__":
-    print("🚀 Flask server is starting...")
+    print(" Flask server is starting...")
     app.run(host="0.0.0.0", port=5000, debug=True)
