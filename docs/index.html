@@ -125,7 +125,7 @@
           <option value="0">Not Active</option>
         </select>
 
-        <button type="submit">Predict Now</button>
+        <button type="submit" id="predictBtn">Predict Now</button>
       </form>
     </section>
 
@@ -154,6 +154,9 @@
             <span class="result-value" id="riskValue"> - </span>
           </div>
         </div>
+        <button id="predictAnotherBtn" class="predict-another-btn">
+          Predict Another
+        </button>
       </div>
 
       <div class="stats-info">
@@ -195,6 +198,19 @@
     <script>
       let chartInstance = null;
       let predictions = [];
+
+      // Load predictions from localStorage on page load
+      function loadPredictionsFromStorage() {
+        const stored = localStorage.getItem("churnPredictions");
+        if (stored) {
+          predictions = JSON.parse(stored);
+        }
+      }
+
+      // Save predictions to localStorage
+      function savePredictionsToStorage() {
+        localStorage.setItem("churnPredictions", JSON.stringify(predictions));
+      }
 
       // Simple prediction simulation
       function simulatePrediction(data) {
@@ -266,6 +282,9 @@
           // Add to predictions
           predictions.push({ probability, risk });
 
+          // Save to localStorage
+          savePredictionsToStorage();
+
           // Update display
           document.getElementById("probabilityValue").textContent =
             probability + "%";
@@ -295,6 +314,23 @@
             .getElementById("stats")
             .scrollIntoView({ behavior: "smooth" });
         });
+
+      // Handle Predict Another button
+      document.addEventListener("DOMContentLoaded", function () {
+        const predictAnotherBtn = document.getElementById("predictAnotherBtn");
+        if (predictAnotherBtn) {
+          predictAnotherBtn.addEventListener("click", function () {
+            // Reset form
+            document.getElementById("predictionForm").reset();
+            // Scroll to predict section
+            document
+              .getElementById("predict")
+              .scrollIntoView({ behavior: "smooth" });
+            // Focus on first input
+            document.getElementById("CreditScore").focus();
+          });
+        }
+      });
 
       function updateStats() {
         const total = predictions.length;
@@ -376,7 +412,13 @@
 
       // Initialize chart on page load
       window.addEventListener("load", function () {
-        updateChart(0, 0, 0);
+        loadPredictionsFromStorage();
+        updateStats();
+        updateChart(
+          predictions.filter((p) => p.risk === "High").length,
+          predictions.filter((p) => p.risk === "Medium").length,
+          predictions.filter((p) => p.risk === "Low").length,
+        );
       });
     </script>
   </body>
